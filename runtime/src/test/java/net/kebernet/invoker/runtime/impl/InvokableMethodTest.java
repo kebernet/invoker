@@ -1,0 +1,202 @@
+/**
+ *    Copyright (c) 2016 Robert Cooper
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+package net.kebernet.invoker.runtime.impl;
+
+import net.kebernet.invoker.annotation.Invokable;
+import net.kebernet.invoker.annotation.Parameter;
+import net.kebernet.invoker.runtime.ParameterValue;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.*;
+
+/**
+ * Created by rcooper on 10/14/16.
+ */
+public class InvokableMethodTest {
+
+    private InvokableMethod testMethod1;
+    private InvokableMethod testMethod2;
+    private InvokableMethod testMethod3;
+    private List<ParameterValue> values1;
+    private List<ParameterValue> values2;
+    private List<ParameterValue> values3;
+    private List<ParameterValue> values4;
+
+    @Before
+    public void setupData(){
+        values1 = Arrays.asList(
+                new ParameterValue("param1", "value"),
+                new ParameterValue("param2", "value"),
+                new ParameterValue("param3", "value"));
+        values2 = Arrays.asList(
+                new ParameterValue("param1", "value"),
+                new ParameterValue("param2", "value"),
+                new ParameterValue("param3", null));
+        values3 = Arrays.asList(
+                new ParameterValue("param1", "value"),
+                new ParameterValue("param2", null),
+                new ParameterValue("param3", null));
+        values4 = Arrays.asList(
+                new ParameterValue("param1", null),
+                new ParameterValue("param2", null),
+                new ParameterValue("param3", null));
+
+        values4 = Arrays.asList(
+                new ParameterValue("param1", 1),
+                new ParameterValue("param2", null),
+                new ParameterValue("param3", null));
+
+        testMethod1 = null;
+        testMethod2 = null;
+        testMethod3 = null;
+
+        for(Method m : MatchTestClass.class.getMethods() ){
+            switch(m.getName()){
+                case "testMethod1":
+                    testMethod1 = new InvokableMethod(m);
+                    break;
+                case "testMethod2":
+                    testMethod2 = new InvokableMethod(m);
+                    break;
+                case "testMethod3":
+                    testMethod3 = new InvokableMethod(m);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    @Test
+    public void testMatch(){
+
+        assertEquals("testMethod", testMethod1.getName());
+        assertEquals("testMethod", testMethod2.getName());
+        assertEquals("testMethod", testMethod3.getName());
+        long incept = System.currentTimeMillis();
+        assertEquals( 0, testMethod1.matchValue("testMethod", values1));
+        assertTrue( testMethod1.matchValue("testMethod", values2) < 0);
+        assertTrue( testMethod1.matchValue("testMethod", values3) < 0);
+        assertTrue( testMethod1.matchValue("testMethod", values4) < 0);
+
+        assertEquals( 0, testMethod2.matchValue("testMethod", values1));
+        assertEquals( 0, testMethod2.matchValue("testMethod", values2));
+        assertTrue( testMethod2.matchValue("testMethod", values3) < 0);
+        assertTrue( testMethod2.matchValue("testMethod", values4) < 0);
+
+        assertEquals( 0, testMethod3.matchValue("testMethod", values1));
+        assertEquals( 0, testMethod3.matchValue("testMethod", values2));
+        assertEquals( 0, testMethod3.matchValue("testMethod", values3));
+        assertTrue( testMethod3.matchValue("testMethod", values4) < 0);
+        long firstRun = System.currentTimeMillis() - incept;
+
+        // Run through the set of match ops again to make sure the memoization
+        // is increasing performance.
+        incept = System.currentTimeMillis();
+        assertEquals( 0, testMethod1.matchValue("testMethod", values1));
+        assertTrue( testMethod1.matchValue("testMethod", values2) < 0);
+        assertTrue( testMethod1.matchValue("testMethod", values3) < 0);
+        assertTrue( testMethod1.matchValue("testMethod", values4) < 0);
+
+        assertEquals( 0, testMethod2.matchValue("testMethod", values1));
+        assertEquals( 0, testMethod2.matchValue("testMethod", values2));
+        assertTrue( testMethod2.matchValue("testMethod", values3) < 0);
+        assertTrue( testMethod2.matchValue("testMethod", values4) < 0);
+
+        assertEquals( 0, testMethod3.matchValue("testMethod", values1));
+        assertEquals( 0, testMethod3.matchValue("testMethod", values2));
+        assertEquals( 0, testMethod3.matchValue("testMethod", values3));
+        assertTrue( testMethod3.matchValue("testMethod", values4) < 0);
+        long secondRun = System.currentTimeMillis() - incept;
+        System.out.println("First run: "+firstRun+" Second run: "+secondRun);
+        // Check for performance gain.
+        assertTrue(firstRun > secondRun);
+    }
+
+    @Test
+    public void testSort(){
+
+        List<InvokableMethod> methods = Arrays.asList(testMethod1, testMethod2, testMethod3);
+        InvokableMethod.Comparator comparator1 = new InvokableMethod.Comparator("testMethod", values1);
+        InvokableMethod.Comparator comparator2 = new InvokableMethod.Comparator("testMethod", values2);
+        InvokableMethod.Comparator comparator3 = new InvokableMethod.Comparator("testMethod", values3);
+        InvokableMethod.Comparator comparator4 = new InvokableMethod.Comparator("testMethod", values4);
+
+
+        //Strictest match all values
+        Collections.sort(methods, comparator1);
+        assertEquals(testMethod1, methods.get(0));
+
+        //Strictest match 2 values
+        Collections.sort(methods, comparator2);
+        assertEquals(testMethod2, methods.get(0));
+
+        //Strictest match 1 value
+        Collections.sort(methods, comparator3);
+        assertEquals(testMethod3, methods.get(0));
+
+        //Undefined match 0 values. Just making sure it doesn't throw
+        Collections.sort(methods, comparator4);
+    }
+
+
+
+    public static class MatchTestClass {
+
+        @Invokable(value = true, invocationName = "testMethod")
+        public void testMethod1(
+                @Parameter("param1") CharSequence param1,
+                @Parameter("param2") CharSequence param2,
+                @Parameter("param3")  CharSequence param3
+        ){
+            // No op.
+        }
+
+        @Invokable(value = true, invocationName = "testMethod")
+        public void testMethod2(
+                @Parameter("param1") CharSequence param1,
+                @Parameter("param2") CharSequence param2,
+                @Parameter(value = "param3", required = false)  CharSequence param3
+        ){
+            // No op.
+        }
+
+        @Invokable(value = true, invocationName = "testMethod")
+        public void testMethod3(
+                @Parameter("param1") String param1,
+                @Parameter(value = "param2", required = false) String param2,
+                @Parameter(value = "param3", required = false) String param3
+        ){
+            // No op.
+        }
+
+        @Invokable(value = true, invocationName = "testMethod")
+        public void testMethod4(
+                @Parameter(value = "param1", required = false) String param1,
+                @Parameter(value = "param2", required = false) String param2,
+                @Parameter(value = "param3", required = false) String param3
+        ){
+            // No op.
+        }
+    }
+
+}
