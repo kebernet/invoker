@@ -19,10 +19,13 @@ import net.kebernet.invoker.runtime.impl.IntrospectionData;
 import net.kebernet.invoker.runtime.impl.InvokableMethod;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +37,20 @@ public class Invoker {
      * to improve performance.
      */
     private final HashMap<Class, IntrospectionData> introspectionData = new HashMap<>();
+
+    private final Optional<Function<Method, String>> findInvocationName;
+
+    private final Optional<Function<Parameter, String>> findMethodName;
+
+    public Invoker(@Nonnull Function<Method, String> findInvocationName, @Nonnull Function<Parameter, String> findMethodName) {
+        this.findInvocationName = Optional.ofNullable(findInvocationName);
+        this.findMethodName = Optional.ofNullable(findMethodName);
+    }
+
+    public Invoker(){
+        this.findMethodName = Optional.empty();
+        this.findInvocationName = Optional.empty();
+    }
 
     /**
      * Registers a type ahead of time and performs the necessary reflection on the class.
@@ -79,7 +96,7 @@ public class Invoker {
     }
 
     private IntrospectionData registerAndReturn(@Nonnull Class type){
-        IntrospectionData data = new IntrospectionData(type);
+        IntrospectionData data = new IntrospectionData(type, this.findInvocationName, this.findMethodName);
         this.introspectionData.put(type, data);
         return data;
     }

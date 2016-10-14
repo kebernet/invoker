@@ -19,14 +19,17 @@ import net.kebernet.invoker.annotation.DefaultInvokable;
 import net.kebernet.invoker.annotation.Invokable;
 import net.kebernet.invoker.runtime.ParameterValue;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  *  Data for a particular type derived from reflection.
@@ -40,8 +43,10 @@ public class IntrospectionData {
     /**
      * Constructor
      * @param clazz the class we are creating introspection data for.
+     * @param findInvocationName
+     * @param findParameterName
      */
-    public IntrospectionData(Class clazz) {
+    public IntrospectionData(Class clazz, @Nonnull Optional<Function<Method, String>> findInvocationName, @Nonnull Optional<Function<Parameter, String>> findParameterName) {
         this.clazz = clazz;
         this.name = clazz.getCanonicalName();
         DefaultInvokable defaultInvokable = (DefaultInvokable) clazz.getAnnotation(DefaultInvokable.class);
@@ -51,7 +56,7 @@ public class IntrospectionData {
                         !m.getDeclaringClass().getPackage().getName().startsWith("java.") &&
                         !m.getDeclaringClass().getPackage().getName().startsWith("javax.") &&
                         isInvokable(isDefaultInvokable, m))
-                .map(InvokableMethod::new)
+                .map(m -> new InvokableMethod(m, findInvocationName, findParameterName))
                 .forEach(methods::add);
     }
 

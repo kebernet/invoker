@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -50,16 +52,18 @@ public class InvokableMethod {
      */
     private final HashMap<Memoization, Integer> memoizations = new HashMap<>();
 
-    public InvokableMethod(@Nonnull Method method) {
+    public InvokableMethod(@Nonnull Method method, @Nonnull Optional<Function<Method, String>> findInvocationName, @Nonnull Optional<Function<Parameter, String>> findParameterName) {
         this.method = method;
-        Invokable invokable = method.getAnnotation(Invokable.class);
-        if(invokable != null && !"".equals(invokable.invocationName())){
-            this.name = invokable.invocationName();
-        } else {
-            this.name = method.getName();
-        }
+        this.name = findInvocationName.orElse((m)->{
+            Invokable invokable = m.getAnnotation(Invokable.class);
+            if(invokable != null && !"".equals(invokable.invocationName())){
+                return invokable.invocationName();
+            } else {
+                return m.getName();
+            }
+        }).apply(method);
         Arrays.stream(method.getParameters())
-                .map(NamedParameter::new)
+                .map(p -> new NamedParameter(p, findParameterName))
                 .forEach(this.parameters::add);
         this.requiredParameterCount = (int) parameters.stream().filter(NamedParameter::isRequired).count();
     }
@@ -114,7 +118,7 @@ public class InvokableMethod {
      * @param values the values to pass to the method.
      * @param <T> the return type of the method.
      * @return The return value of the method or Void.class
-     * @throws InvokerException
+     * @throws InvokerException thrown if something goes wrong.
      */
     public <T> T invoke(Object target, HashMap<String, ParameterValue> values) throws InvokerException {
         Object[] arguments = new Object[this.parameters.size()];
@@ -197,13 +201,13 @@ public class InvokableMethod {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("InvokableMethod{");
-        sb.append("\n\tmethod=").append(method);
-        sb.append(",\n\t name='").append(name).append('\'');
-        sb.append(",\n\t parameters=").append(parameters);
-        sb.append(",\n\t requiredParameterCount=").append(requiredParameterCount);
-        sb.append("\n}\n");
-        return sb.toString();
+        return new StringBuilder("InvokableMethod{")
+            .append("\n\tmethod=").append(method)
+            .append(",\n\t name='").append(name).append('\'')
+            .append(",\n\t parameters=").append(parameters)
+            .append(",\n\t requiredParameterCount=").append(requiredParameterCount)
+            .append("\n}\n")
+            .toString();
     }
 
     @Override
@@ -213,10 +217,10 @@ public class InvokableMethod {
 
         InvokableMethod that = (InvokableMethod) o;
 
-        if (requiredParameterCount != that.requiredParameterCount) return false;
-        if (!method.equals(that.method)) return false;
-        if (!name.equals(that.name)) return false;
-        return parameters.equals(that.parameters);
+        return requiredParameterCount == that.requiredParameterCount &&
+                method.equals(that.method) &&
+                name.equals(that.name) &&
+                parameters.equals(that.parameters);
 
     }
 

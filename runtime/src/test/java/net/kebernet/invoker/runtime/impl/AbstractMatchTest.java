@@ -21,6 +21,7 @@ import org.junit.Before;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by rcooper on 10/14/16.
@@ -67,16 +68,16 @@ public abstract class AbstractMatchTest {
         for(Method m : MatchTestClass.class.getMethods() ){
             switch(m.getName()){
                 case "testMethod1":
-                    testMethod1 = new InvokableMethod(m);
+                    testMethod1 = new InvokableMethod(m, Optional.empty(), Optional.empty());
                     break;
                 case "testMethod2":
-                    testMethod2 = new InvokableMethod(m);
+                    testMethod2 = new InvokableMethod(m, Optional.empty(), Optional.empty());
                     break;
                 case "testMethod3":
-                    testMethod3 = new InvokableMethod(m);
+                    testMethod3 = new InvokableMethod(m, Optional.empty(), Optional.empty());
                     break;
                 case "testMethod4":
-                    testMethod4 = new InvokableMethod(m);
+                    testMethod4 = new InvokableMethod(m, Optional.empty(), Optional.empty());
                     break;
                 default:
                     break;

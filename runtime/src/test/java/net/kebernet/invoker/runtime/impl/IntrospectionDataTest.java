@@ -15,7 +15,6 @@
  */
 package net.kebernet.invoker.runtime.impl;
 
-import net.kebernet.invoker.annotation.DefaultInvokable;
 import net.kebernet.invoker.runtime.ParameterValue;
 import org.junit.Test;
 
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,7 +35,7 @@ public class IntrospectionDataTest extends AbstractMatchTest {
 
     @Test
     public void getMethodsSimple() throws Exception {
-        IntrospectionData instance = new IntrospectionData(MatchTestClass.class);
+        IntrospectionData instance = new IntrospectionData(MatchTestClass.class, Optional.empty(), Optional.empty());
         ArrayList<InvokableMethod> methodList = new ArrayList<>(instance.getMethods());
         ArrayList<InvokableMethod> check = new ArrayList<>(Arrays.asList(testMethod1, testMethod2, testMethod3, testMethod4));
         Collections.sort(methodList, (o1, o2) -> o1.getNativeMethod().getName().compareTo(o2.getNativeMethod().getName()));
@@ -45,7 +45,7 @@ public class IntrospectionDataTest extends AbstractMatchTest {
 
     @Test
     public void bestMatchSimple() throws Exception {
-        IntrospectionData instance = new IntrospectionData(MatchTestClass.class);
+        IntrospectionData instance = new IntrospectionData(MatchTestClass.class, Optional.empty(), Optional.empty());
         assertEquals(testMethod1, instance.bestMatch("testMethod", values1).orElseThrow(RuntimeException::new));
         assertEquals(testMethod2, instance.bestMatch("testMethod", values2).orElseThrow(RuntimeException::new));
         assertEquals(testMethod3, instance.bestMatch("testMethod", values3).orElseThrow(RuntimeException::new));
@@ -64,7 +64,7 @@ public class IntrospectionDataTest extends AbstractMatchTest {
                 new ParameterValue("param1", "value"),
                 new ParameterValue("param2", "value")
         );
-        IntrospectionData instance = new IntrospectionData(OverloadWithDifferentLength.class);
+        IntrospectionData instance = new IntrospectionData(OverloadWithDifferentLength.class, Optional.empty(), Optional.empty());
         assertEquals("testMethod1", instance.bestMatch("testMethod", values).orElseThrow(RuntimeException::new).getNativeMethod().getName());
         assertEquals("testMethod2", instance.bestMatch("testMethod", values2).orElseThrow(RuntimeException::new).getNativeMethod().getName());
         assertEquals("testMethod3", instance.bestMatch("testMethod", values3).orElseThrow(RuntimeException::new).getNativeMethod().getName());
@@ -72,7 +72,7 @@ public class IntrospectionDataTest extends AbstractMatchTest {
 
     @Test
     public void simpleDefaultInvokable(){
-        IntrospectionData data = new IntrospectionData(DefaultInvokableTest.AllInvokable.class);
+        IntrospectionData data = new IntrospectionData(DefaultInvokableTest.AllInvokable.class, Optional.empty(), Optional.empty());
         assertEquals("testMethod", data.getMethods().stream().findFirst().orElseThrow(RuntimeException::new).getNativeMethod().getName());
         NamedParameter param = data.getMethods().stream().findFirst().orElseThrow(RuntimeException::new)
                 .getParameters().stream().findFirst().orElseThrow(RuntimeException::new);
@@ -80,8 +80,8 @@ public class IntrospectionDataTest extends AbstractMatchTest {
         assertEquals(String.class, param.getType());
         assertEquals(false, param.isRequired());
 
-        assertTrue(new IntrospectionData(DefaultInvokableTest.NoneInvokable.class).getMethods().isEmpty());
-        assertTrue(new IntrospectionData(DefaultInvokableTest.NoneInvokable2.class).getMethods().isEmpty());
+        assertTrue(new IntrospectionData(DefaultInvokableTest.NoneInvokable.class, Optional.empty(), Optional.empty()).getMethods().isEmpty());
+        assertTrue(new IntrospectionData(DefaultInvokableTest.NoneInvokable2.class, Optional.empty(), Optional.empty()).getMethods().isEmpty());
     }
 
 }

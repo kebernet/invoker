@@ -18,6 +18,8 @@ package net.kebernet.invoker.runtime.impl;
 import net.kebernet.invoker.annotation.Parameter;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Created by rcooper on 10/13/16.
@@ -28,19 +30,21 @@ public class NamedParameter {
     private final String name;
     private final boolean required;
 
-    public NamedParameter(@Nonnull java.lang.reflect.Parameter parameter) {
+    public NamedParameter(@Nonnull java.lang.reflect.Parameter parameter, Optional<Function<java.lang.reflect.Parameter, String>> findParameterName) {
         this.parameter = parameter;
         this.type = parameter.getType();
-        Parameter name = parameter.getAnnotation(Parameter.class);
-        if(name == null){
-            this.name = parameter.getName();
-        } else {
-            this.name = name.value();
-        }
+        Parameter nameAnnotation = parameter.getAnnotation(Parameter.class);
+        this.name = findParameterName.orElse((p)->{
+            if(nameAnnotation == null){
+                return parameter.getName();
+            } else {
+                return nameAnnotation.value();
+            }
+        }).apply(parameter);
         if(this.name == null){
             throw new RuntimeException("Could not get name for parameter "+parameter.toString());
         }
-        this.required = parameter.getType().isPrimitive() || (name != null && name.required());
+        this.required = parameter.getType().isPrimitive() || (nameAnnotation != null && nameAnnotation.required());
     }
 
     public java.lang.reflect.Parameter getParameter() {
@@ -66,7 +70,8 @@ public class NamedParameter {
             .append(", type=").append(type)
             .append(", name='").append(name).append('\'')
             .append(", required=").append(required)
-            .append('}').toString();
+            .append('}')
+            .toString();
     }
 
     @Override
