@@ -32,7 +32,7 @@ public @interface Invokable {
      *
      * @return
      */
-    boolean value();
+    boolean value() default true;
 
     /** The invocation name of the method to use, or default for the Java method name
      *

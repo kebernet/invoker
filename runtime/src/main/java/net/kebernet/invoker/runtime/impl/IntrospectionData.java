@@ -46,7 +46,7 @@ public class IntrospectionData {
      * @param findInvocationName
      * @param findParameterName
      */
-    public IntrospectionData(Class clazz, @Nonnull Optional<Function<Method, String>> findInvocationName, @Nonnull Optional<Function<Parameter, String>> findParameterName) {
+    public IntrospectionData(@Nonnull Class clazz, @Nonnull Optional<Function<Method, String>> findInvocationName, @Nonnull Optional<Function<Parameter, String>> findParameterName) {
         this.clazz = clazz;
         this.name = clazz.getCanonicalName();
         DefaultInvokable defaultInvokable = (DefaultInvokable) clazz.getAnnotation(DefaultInvokable.class);
@@ -64,7 +64,7 @@ public class IntrospectionData {
      * The type this is for.
      * @return The type this is for
      */
-    public Class getType() {
+    public @Nonnull Class getType() {
         return clazz;
     }
 
@@ -72,7 +72,7 @@ public class IntrospectionData {
      * The name of the class.
      * @return The name fo the class
      */
-    public String getName() {
+    public @Nonnull String getName() {
         return name;
     }
 
@@ -80,11 +80,11 @@ public class IntrospectionData {
      *
      * @return Read-only set of methods.
      */
-    public Set<InvokableMethod> getMethods() {
+    public @Nonnull Set<InvokableMethod> getMethods() {
         return Collections.unmodifiableSet(methods);
     }
 
-    private boolean isInvokable(boolean isDefaultInvokable, Method m) {
+    private boolean isInvokable(boolean isDefaultInvokable, @Nonnull Method m) {
         Invokable invokable = m.getAnnotation(Invokable.class);
         return invokable != null ? invokable.value() : isDefaultInvokable;
     }
@@ -95,7 +95,7 @@ public class IntrospectionData {
      * @param parameters The parameter values you want to pass in.
      * @return An optional of an InvokableMethod.
      */
-    public Optional<InvokableMethod> bestMatch(String name, List<ParameterValue> parameters){
+    public @Nonnull Optional<InvokableMethod> bestMatch(String name, List<ParameterValue> parameters){
         return this.methods.stream()
                 .sorted(new InvokableMethod.Comparator(name, parameters))
                 .findFirst()

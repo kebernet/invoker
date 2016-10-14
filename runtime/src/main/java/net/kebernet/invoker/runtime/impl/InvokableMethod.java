@@ -88,11 +88,11 @@ public class InvokableMethod {
      * Returns the j.l.r.Method this encapsulates.
      * @return The native method.
      */
-    public Method getNativeMethod(){
+    public @Nonnull Method getNativeMethod(){
         return this.method;
     }
 
-    public Set<NamedParameter> getParameters(){
+    public @Nonnull Set<NamedParameter> getParameters(){
         return Collections.unmodifiableSet(parameters);
     }
 
@@ -120,7 +120,7 @@ public class InvokableMethod {
      * @return The return value of the method or Void.class
      * @throws InvokerException thrown if something goes wrong.
      */
-    public <T> T invoke(Object target, HashMap<String, ParameterValue> values) throws InvokerException {
+    public @Nullable <T> T invoke(@Nonnull Object target, @Nonnull HashMap<String, ParameterValue> values) throws InvokerException {
         Object[] arguments = new Object[this.parameters.size()];
         int index = 0;
         for(NamedParameter parameter : parameters){
@@ -195,7 +195,7 @@ public class InvokableMethod {
         return score;
     }
 
-    private Optional<Integer> lookupMemoized(List<ParameterValue> values){
+    private @Nonnull Optional<Integer> lookupMemoized(@Nonnull List<ParameterValue> values){
         return Optional.ofNullable(memoizations.get(new Memoization(values)));
     }
 
@@ -241,7 +241,7 @@ public class InvokableMethod {
         private final String name;
         private final List<ParameterValue> values;
 
-        Comparator(String name, List<ParameterValue> values) {
+        Comparator(@Nonnull String name, @Nonnull List<ParameterValue> values) {
             this.name = name;
             this.values = values;
         }
