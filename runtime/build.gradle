@@ -4,6 +4,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: "com.github.hierynomus.license"
 apply plugin: 'findbugs'
+apply plugin: "jacoco"
 
 sourceCompatibility = 1.8
 
@@ -22,6 +23,22 @@ tasks.withType(FindBugs) {
         xml.enabled false
         html.enabled true
 //        html.stylesheet resources.text.fromFile('config/xsl/findbugs-custom.xsl')
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/reports/jacoco"
+    }
+}
+
+test {
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
     }
 }
 
