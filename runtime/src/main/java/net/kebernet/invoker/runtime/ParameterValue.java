@@ -1,4 +1,4 @@
-/**
+/*
  *    Copyright (c) 2016 Robert Cooper
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,21 +19,34 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Created by rcooper on 10/13/16.
+ *  A simple class containing a parameter name and a value to use for invocation.
  */
 public class ParameterValue {
     private final String name;
     private final Object value;
 
+    /**
+     * Constructor
+     * @param name the name of the parameter
+     * @param value The value of the parameter
+     */
     public ParameterValue(@Nonnull String name, @Nullable Object value) {
         this.name = name;
         this.value = value;
     }
 
+    /**
+     * The name of the parameter.
+     * @return The name of the parameter.
+     */
     public @Nonnull String getName() {
         return name;
     }
 
+    /**
+     * The value of the parameter.
+     * @return The value of the parameter.
+     */
     public @Nullable Object getValue() {
         return value;
     }
@@ -45,8 +58,8 @@ public class ParameterValue {
 
         ParameterValue that = (ParameterValue) o;
 
-        if (!name.equals(that.name)) return false;
-        return value != null ? value.equals(that.value) : that.value == null;
+        return name.equals(that.name) &&
+                (value != null ? value.equals(that.value) : that.value == null);
 
     }
 

@@ -1,4 +1,4 @@
-/**
+/*
  *    Copyright (c) 2016 Robert Cooper
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +13,3 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package net.kebernet.invoker.runtime;
-
-import net.kebernet.invoker.runtime.impl.IntrospectionData;
-
-import java.util.HashMap;
-
-/**
- * Created by rcooper on 10/13/16.
- */
-public class InvokerContext {
-    private final HashMap<Class, IntrospectionData> introspectionData = new HashMap<>();
-
-
-}

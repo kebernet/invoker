@@ -15,8 +15,6 @@
  */
 package net.kebernet.invoker.runtime.impl;
 
-import net.kebernet.invoker.annotation.Invokable;
-import net.kebernet.invoker.annotation.Parameter;
 import net.kebernet.invoker.runtime.ParameterValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -158,45 +156,5 @@ public class InvokableMethodTest {
         Collections.sort(methods, comparator4);
     }
 
-
-
-    public static class MatchTestClass {
-
-        @Invokable(value = true, invocationName = "testMethod")
-        public void testMethod1(
-                @Parameter("param1") CharSequence param1,
-                @Parameter("param2") CharSequence param2,
-                @Parameter("param3")  CharSequence param3
-        ){
-            // No op.
-        }
-
-        @Invokable(value = true, invocationName = "testMethod")
-        public void testMethod2(
-                @Parameter("param1") CharSequence param1,
-                @Parameter("param2") CharSequence param2,
-                @Parameter(value = "param3", required = false)  CharSequence param3
-        ){
-            // No op.
-        }
-
-        @Invokable(value = true, invocationName = "testMethod")
-        public void testMethod3(
-                @Parameter("param1") String param1,
-                @Parameter(value = "param2", required = false) String param2,
-                @Parameter(value = "param3", required = false) String param3
-        ){
-            // No op.
-        }
-
-        @Invokable(value = true, invocationName = "testMethod")
-        public void testMethod4(
-                @Parameter(value = "param1", required = false) String param1,
-                @Parameter(value = "param2", required = false) String param2,
-                @Parameter(value = "param3", required = false) String param3
-        ){
-            // No op.
-        }
-    }
 
 }

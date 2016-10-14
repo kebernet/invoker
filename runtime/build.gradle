@@ -13,6 +13,7 @@ repositories {
 license {
     header rootProject.file('etc/header.txt')
     strictCheck true
+    mapping("java", "SLASHSTAR_STYLE")
 }
 
 dependencies {

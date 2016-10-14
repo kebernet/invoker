@@ -1,4 +1,4 @@
-/**
+/*
  *    Copyright (c) 2016 Robert Cooper
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,53 @@
  */
 package net.kebernet.invoker.runtime;
 
+import net.kebernet.invoker.runtime.impl.IntrospectionData;
+import net.kebernet.invoker.runtime.impl.InvokableMethod;
+
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 /**
- * Created by rcooper on 10/13/16.
+ * This is the top level class to use to invoke method dynamically on a class.
  */
 public class Invoker {
+    /**
+     * A map for keeping caches of the IntrospectionData for a given type around
+     * to improve performance.
+     */
+    private final HashMap<Class, IntrospectionData> introspectionData = new HashMap<>();
 
-    private final Object target;
+    /**
+     * Registers a type ahead of time and performs the necessary reflection on the class.
+     * This is not necessary, but can help with performance.
+     * @param type The type to register for invocation.
+     */
+    public void registerType(@Nonnull Class type){
+        registerAndReturn(type);
+    }
 
-    public Invoker(Object target) {
-        this.target = target;
+    public <T> T invoke(Object target, String methodName, List<ParameterValue> values) throws InvokerException {
+        IntrospectionData data = Optional.ofNullable(introspectionData.get(target.getClass()))
+                .orElseGet(()-> registerAndReturn(target.getClass()));
+        Optional<InvokableMethod> method = data.bestMatch(methodName, values);
+        HashMap<String, ParameterValue> valuesMap = new HashMap<>();
+        values.forEach(v -> valuesMap.put(v.getName(), v));
+        return method.orElseThrow(
+                ()-> new InvokerException("Could not resolve method name:" +methodName, null, target, methodName, values)
+            ).invoke(target, valuesMap);
+    }
+
+    public <T> T invoke(Object target, String methodName, Map<String, Object> values) throws InvokerException {
+        return invoke(target, methodName, values.entrySet().stream().map(e-> new ParameterValue(e.getKey(), e.getValue())).collect(Collectors.toList()));
+    }
+
+    private IntrospectionData registerAndReturn(@Nonnull Class type){
+        IntrospectionData data = new IntrospectionData(type);
+        this.introspectionData.put(type, data);
+        return data;
     }
 }

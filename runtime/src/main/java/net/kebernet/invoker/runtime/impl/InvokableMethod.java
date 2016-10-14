@@ -1,4 +1,4 @@
-/**
+/*
  *    Copyright (c) 2016 Robert Cooper
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +16,15 @@
 package net.kebernet.invoker.runtime.impl;
 
 import net.kebernet.invoker.annotation.Invokable;
+import net.kebernet.invoker.annotation.Parameter;
+import net.kebernet.invoker.runtime.InvokerException;
 import net.kebernet.invoker.runtime.ParameterValue;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,7 +63,7 @@ public class InvokableMethod {
 
     /**
      * The invocation name of the method. May NOT match the actual name of the enclosed method.
-     * @return
+     * @return Invocation name
      */
     public @Nonnull String getName() {
         return name;
@@ -67,7 +71,7 @@ public class InvokableMethod {
 
     /**
      * The number of required parameters for the method.
-     * @return
+     * @return Count of required parameters
      */
     public int getRequiredParameterCount(){
         return requiredParameterCount;
@@ -89,9 +93,25 @@ public class InvokableMethod {
         return lookupMemoized(values).orElseGet(()-> matchValues(values));
     }
 
+    public <T> T invoke(Object target, HashMap<String, ParameterValue> values) throws InvokerException {
+        Object[] arguments = new Object[this.parameters.size()];
+        int index = 0;
+        for(NamedParameter parameter : parameters){
+            arguments[index] = Optional.ofNullable(values.get(parameter.getName()))
+                    .map(ParameterValue::getValue)
+                    .orElse(null);
+            index++;
+        }
+        try {
+            return (T) this.method.invoke(target, arguments);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new InvokerException("Failed to invoke "+this.method.getName()+" with args"+ Arrays.toString(arguments), e, target, name, new ArrayList<>(values.values()));
+        }
+    }
+
     private int matchValues(@Nonnull List<ParameterValue> values){
         HashMap<String, ParameterValue> valByName = new HashMap<>(values.size());
-        values.stream().forEach(pv -> valByName.put(pv.getName(), pv));
+        values.forEach(pv -> valByName.put(pv.getName(), pv));
         Set<NamedParameter> matches = parameters
                 .stream()
                 .filter(np -> {
@@ -113,7 +133,7 @@ public class InvokableMethod {
             return memoize(values, -1);
         }
         Set<String> extra = new HashSet<>(valByName.keySet());
-        extra.removeAll( parameters.stream().map(p->p.getName()).collect(Collectors.toSet()));
+        extra.removeAll( parameters.stream().map(NamedParameter::getName).collect(Collectors.toSet()));
         if(!extra.isEmpty()){
             return memoize(values, -1);
         }
@@ -166,9 +186,8 @@ public class InvokableMethod {
         InvokableMethod that = (InvokableMethod) o;
 
         if (requiredParameterCount != that.requiredParameterCount) return false;
-        if (!method.equals(that.method)) return false;
-        if (!name.equals(that.name)) return false;
-        return parameters.equals(that.parameters);
+        return method.equals(that.method) && name.equals(that.name) &&
+                parameters.equals(that.parameters);
 
     }
 
@@ -184,12 +203,12 @@ public class InvokableMethod {
     /**
      * A Comapator implementation that returns the best-fit match score.
      */
-    public static class Comparator implements java.util.Comparator<InvokableMethod>{
+     static class Comparator implements java.util.Comparator<InvokableMethod>{
 
         private final String name;
         private final List<ParameterValue> values;
 
-        public Comparator(String name, List<ParameterValue> values) {
+        Comparator(String name, List<ParameterValue> values) {
             this.name = name;
             this.values = values;
         }
@@ -201,8 +220,7 @@ public class InvokableMethod {
             if(o1Match == 0 && o2Match == 0){
                 // If both methods are exact matches with the parameter list, return the one with the
                 // strictest set of parameters.
-                int result = Integer.compare(o2.getRequiredParameterCount(), o1.getRequiredParameterCount());
-                return result;
+                return Integer.compare(o2.getRequiredParameterCount(), o1.getRequiredParameterCount());
             } else {
                 return Integer.compare(o2Match, o1Match);
             }
@@ -257,8 +275,8 @@ public class InvokableMethod {
 
             MemoizedParameter that = (MemoizedParameter) o;
 
-            if (!name.equals(that.name)) return false;
-            return type != null ? type.equals(that.type) : that.type == null;
+            return name.equals(that.name) &&
+                    (type != null ? type.equals(that.type) : that.type == null);
 
         }
 

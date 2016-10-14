@@ -1,4 +1,4 @@
-/**
+/*
  *    Copyright (c) 2016 Robert Cooper
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Created by rcooper on 10/13/16.
+ *  Data for a particular type derived from reflection.
  */
 public class IntrospectionData {
 
@@ -37,6 +37,10 @@ public class IntrospectionData {
     private final String name;
     private final LinkedHashSet<InvokableMethod> methods = new LinkedHashSet<>();
 
+    /**
+     * Constructor
+     * @param clazz the class we are creating introspection data for.
+     */
     public IntrospectionData(Class clazz) {
         this.clazz = clazz;
         this.name = clazz.getCanonicalName();
@@ -49,14 +53,26 @@ public class IntrospectionData {
                 .forEach(methods::add);
     }
 
+    /**
+     * The type this is for.
+     * @return The type this is for
+     */
     public Class getType() {
         return clazz;
     }
 
+    /**
+     * The name of the class.
+     * @return The name fo the class
+     */
     public String getName() {
         return name;
     }
 
+    /** A set of InvokableMethods contained in this class.
+     *
+     * @return Read-only set of methods.
+     */
     public Set<InvokableMethod> getMethods() {
         return Collections.unmodifiableSet(methods);
     }
@@ -66,9 +82,16 @@ public class IntrospectionData {
         return invokable != null ? invokable.value() : isDefaultInvokable;
     }
 
+    /** Finds the best match for the given method name and parameter values.
+     *
+     * @param name The invocation name of the method.
+     * @param parameters The parameter values you want to pass in.
+     * @return An optional of an InvokableMethod.
+     */
     public Optional<InvokableMethod> bestMatch(String name, List<ParameterValue> parameters){
         return this.methods.stream()
                 .sorted(new InvokableMethod.Comparator(name, parameters))
-                .findFirst();
+                .findFirst()
+                .filter(im -> im.matchValue(name, parameters) == 0);
     }
 }

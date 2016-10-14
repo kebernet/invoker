@@ -1,4 +1,4 @@
-/**
+/*
  *    Copyright (c) 2016 Robert Cooper
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,12 +56,11 @@ public class NamedParameter {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("NamedParameter{");
-        sb.append("parameter=").append(parameter);
-        sb.append(", type=").append(type);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", required=").append(required);
-        sb.append('}');
-        return sb.toString();
+        return new StringBuilder("NamedParameter{")
+            .append("parameter=").append(parameter)
+            .append(", type=").append(type)
+            .append(", name='").append(name).append('\'')
+            .append(", required=").append(required)
+            .append('}').toString();
     }
 }
