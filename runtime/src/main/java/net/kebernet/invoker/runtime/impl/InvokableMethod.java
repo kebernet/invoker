@@ -21,10 +21,12 @@ import net.kebernet.invoker.runtime.ParameterValue;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -34,7 +36,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Created by rcooper on 10/13/16.
+ *  This is a wrapper class for j.l.r.Method that pulls metadata off the method annotations
+ *  and contains the code for evaluating whether or not the method is a match for a set
+ *  of ParameterValues.
  */
 public class InvokableMethod {
     private final Method method;
@@ -49,7 +53,7 @@ public class InvokableMethod {
     public InvokableMethod(@Nonnull Method method) {
         this.method = method;
         Invokable invokable = method.getAnnotation(Invokable.class);
-        if(!"".equals(invokable.invocationName())){
+        if(invokable != null && !"".equals(invokable.invocationName())){
             this.name = invokable.invocationName();
         } else {
             this.name = method.getName();
@@ -77,6 +81,18 @@ public class InvokableMethod {
     }
 
     /**
+     * Returns the j.l.r.Method this encapsulates.
+     * @return The native method.
+     */
+    public Method getNativeMethod(){
+        return this.method;
+    }
+
+    public Set<NamedParameter> getParameters(){
+        return Collections.unmodifiableSet(parameters);
+    }
+
+    /**
      * This method returns a match distance for the given name and parameter values. The
      * return result will be <0 for no match, 0 for exact match, and a positive integer
      * representing the distance from being an exact match.
@@ -92,6 +108,14 @@ public class InvokableMethod {
         return lookupMemoized(values).orElseGet(()-> matchValues(values));
     }
 
+    /**
+     * Invokes the method on the target.
+     * @param target The target object to invoke the method on.
+     * @param values the values to pass to the method.
+     * @param <T> the return type of the method.
+     * @return The return value of the method or Void.class
+     * @throws InvokerException
+     */
     public <T> T invoke(Object target, HashMap<String, ParameterValue> values) throws InvokerException {
         Object[] arguments = new Object[this.parameters.size()];
         int index = 0;
@@ -102,7 +126,12 @@ public class InvokableMethod {
             index++;
         }
         try {
-            return (T) this.method.invoke(target, arguments);
+            Object result = this.method.invoke(target, arguments);
+            if(this.method.getReturnType().equals(Void.class)){
+                return (T) Void.class;
+            } else {
+                return (T) result;
+            }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new InvokerException("Failed to invoke "+this.method.getName()+" with args"+ Arrays.toString(arguments), e, target, name, new ArrayList<>(values.values()));
         }
@@ -185,8 +214,9 @@ public class InvokableMethod {
         InvokableMethod that = (InvokableMethod) o;
 
         if (requiredParameterCount != that.requiredParameterCount) return false;
-        return method.equals(that.method) && name.equals(that.name) &&
-                parameters.equals(that.parameters);
+        if (!method.equals(that.method)) return false;
+        if (!name.equals(that.name)) return false;
+        return parameters.equals(that.parameters);
 
     }
 
@@ -202,7 +232,7 @@ public class InvokableMethod {
     /**
      * A Comapator implementation that returns the best-fit match score.
      */
-     static class Comparator implements java.util.Comparator<InvokableMethod>{
+     static class Comparator implements java.util.Comparator<InvokableMethod>, Serializable{
 
         private final String name;
         private final List<ParameterValue> values;
@@ -226,6 +256,9 @@ public class InvokableMethod {
         }
     }
 
+    /**
+     * A data structure for recording the parameter match significance for an invocation.
+     */
     private static class Memoization {
         private final MemoizedParameter[] parameters;
 
@@ -253,6 +286,9 @@ public class InvokableMethod {
         }
     }
 
+    /**
+     * Metadata for a param for memoization
+     */
     private static class MemoizedParameter {
         private final String name;
         private final Class type;

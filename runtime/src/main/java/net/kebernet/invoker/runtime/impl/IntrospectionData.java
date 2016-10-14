@@ -47,8 +47,10 @@ public class IntrospectionData {
         DefaultInvokable defaultInvokable = (DefaultInvokable) clazz.getAnnotation(DefaultInvokable.class);
         final boolean isDefaultInvokable = defaultInvokable != null && defaultInvokable.value();
         Arrays.stream(clazz.getMethods())
-                .filter( m -> (m.getModifiers() & Modifier.PUBLIC) > 0)
-                .filter( m -> isInvokable(isDefaultInvokable, m))
+                .filter( m -> (m.getModifiers() & Modifier.PUBLIC) > 0 &&
+                        !m.getDeclaringClass().getPackage().getName().startsWith("java.") &&
+                        !m.getDeclaringClass().getPackage().getName().startsWith("javax.") &&
+                        isInvokable(isDefaultInvokable, m))
                 .map(InvokableMethod::new)
                 .forEach(methods::add);
     }

@@ -15,74 +15,19 @@
  */
 package net.kebernet.invoker.runtime.impl;
 
-import net.kebernet.invoker.runtime.ParameterValue;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by rcooper on 10/14/16.
  */
-public class InvokableMethodTest {
-
-    private InvokableMethod testMethod1;
-    private InvokableMethod testMethod2;
-    private InvokableMethod testMethod3;
-    private List<ParameterValue> values1;
-    private List<ParameterValue> values2;
-    private List<ParameterValue> values3;
-    private List<ParameterValue> values4;
-
-    @Before
-    public void setupData(){
-        values1 = Arrays.asList(
-                new ParameterValue("param1", "value"),
-                new ParameterValue("param2", "value"),
-                new ParameterValue("param3", "value"));
-        values2 = Arrays.asList(
-                new ParameterValue("param1", "value"),
-                new ParameterValue("param2", "value"),
-                new ParameterValue("param3", null));
-        values3 = Arrays.asList(
-                new ParameterValue("param1", "value"),
-                new ParameterValue("param2", null),
-                new ParameterValue("param3", null));
-        values4 = Arrays.asList(
-                new ParameterValue("param1", null),
-                new ParameterValue("param2", null),
-                new ParameterValue("param3", null));
-
-        values4 = Arrays.asList(
-                new ParameterValue("param1", 1),
-                new ParameterValue("param2", null),
-                new ParameterValue("param3", null));
-
-        testMethod1 = null;
-        testMethod2 = null;
-        testMethod3 = null;
-
-        for(Method m : MatchTestClass.class.getMethods() ){
-            switch(m.getName()){
-                case "testMethod1":
-                    testMethod1 = new InvokableMethod(m);
-                    break;
-                case "testMethod2":
-                    testMethod2 = new InvokableMethod(m);
-                    break;
-                case "testMethod3":
-                    testMethod3 = new InvokableMethod(m);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+public class InvokableMethodTest extends AbstractMatchTest {
 
     @Test
     public void testMatch(){
@@ -125,7 +70,7 @@ public class InvokableMethodTest {
         assertEquals( 0, testMethod3.matchValue("testMethod", values3));
         assertTrue( testMethod3.matchValue("testMethod", values4) < 0);
         long secondRun = System.currentTimeMillis() - incept;
-        System.out.println("First run: "+firstRun+" Second run: "+secondRun);
+
         // Check for performance gain.
         assertTrue(firstRun > secondRun);
     }

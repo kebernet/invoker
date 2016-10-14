@@ -3,6 +3,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: "com.github.hierynomus.license"
+apply plugin: 'findbugs'
 
 sourceCompatibility = 1.8
 
@@ -16,8 +17,18 @@ license {
     mapping("java", "SLASHSTAR_STYLE")
 }
 
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+//        html.stylesheet resources.text.fromFile('config/xsl/findbugs-custom.xsl')
+    }
+}
+
 dependencies {
     compile project(":annotation")
-    compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+
+    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

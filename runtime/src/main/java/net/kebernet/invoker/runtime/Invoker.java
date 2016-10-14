@@ -44,6 +44,16 @@ public class Invoker {
         registerAndReturn(type);
     }
 
+    /**
+     * Invokes the named method on the target object from list of ParameterValues.
+     *
+     * @param target The object to invoke on
+     * @param methodName The method name to invoke
+     * @param values values for the named parameters
+     * @param <T> The return type of the method
+     * @return The results of the method, or Void.class if the method has not return value.
+     * @throws InvokerException is thrown generally if there is a reflection problem or the target method could not be resolved.
+     */
     public <T> T invoke(Object target, String methodName, List<ParameterValue> values) throws InvokerException {
         IntrospectionData data = Optional.ofNullable(introspectionData.get(target.getClass()))
                 .orElseGet(()-> registerAndReturn(target.getClass()));
@@ -55,6 +65,15 @@ public class Invoker {
             ).invoke(target, valuesMap);
     }
 
+    /**
+     * Invokes the named method on the target object from a map of values.
+     * @param target The object to invoke on
+     * @param methodName The method name to invoke
+     * @param values values for the named parameters
+     * @param <T> The return type of the method
+     * @return The results of the method or Void.class if the method has no return value.
+     * @throws InvokerException is thrown generally if there is a reflection problem or the target method could not be resolved.
+     */
     public <T> T invoke(Object target, String methodName, Map<String, Object> values) throws InvokerException {
         return invoke(target, methodName, values.entrySet().stream().map(e-> new ParameterValue(e.getKey(), e.getValue())).collect(Collectors.toList()));
     }

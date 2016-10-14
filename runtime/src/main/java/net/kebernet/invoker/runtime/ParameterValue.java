@@ -17,11 +17,12 @@ package net.kebernet.invoker.runtime;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.Serializable;
 
 /**
  *  A simple class containing a parameter name and a value to use for invocation.
  */
-public class ParameterValue {
+public class ParameterValue implements Serializable {
     private final String name;
     private final Object value;
 
