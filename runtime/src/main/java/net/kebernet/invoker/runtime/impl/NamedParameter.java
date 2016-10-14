@@ -40,7 +40,7 @@ public class NamedParameter {
         if(this.name == null){
             throw new RuntimeException("Could not get name for parameter "+parameter.toString());
         }
-        this.required = (name != null && name.required()) || parameter.getType().isPrimitive();
+        this.required = parameter.getType().isPrimitive() || (name != null && name.required());
     }
 
     public java.lang.reflect.Parameter getParameter() {
