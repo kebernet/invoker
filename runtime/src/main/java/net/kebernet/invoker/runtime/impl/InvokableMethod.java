@@ -16,7 +16,6 @@
 package net.kebernet.invoker.runtime.impl;
 
 import net.kebernet.invoker.annotation.Invokable;
-import net.kebernet.invoker.annotation.Parameter;
 import net.kebernet.invoker.runtime.InvokerException;
 import net.kebernet.invoker.runtime.ParameterValue;
 
