@@ -32,6 +32,9 @@ jacocoTestReport {
 }
 
 test {
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
     jacoco {
         append = false
         destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
