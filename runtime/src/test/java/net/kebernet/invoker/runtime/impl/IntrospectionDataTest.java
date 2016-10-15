@@ -18,6 +18,7 @@ package net.kebernet.invoker.runtime.impl;
 import net.kebernet.invoker.runtime.ParameterValue;
 import org.junit.Test;
 
+import javax.management.relation.RoleUnresolved;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,8 +81,16 @@ public class IntrospectionDataTest extends AbstractMatchTest {
         assertEquals(String.class, param.getType());
         assertEquals(false, param.isRequired());
 
-        assertTrue(new IntrospectionData(DefaultInvokableTest.NoneInvokable.class, Optional.empty(), Optional.empty()).getMethods().isEmpty());
-        assertTrue(new IntrospectionData(DefaultInvokableTest.NoneInvokable2.class, Optional.empty(), Optional.empty()).getMethods().isEmpty());
     }
 
+    @Test(expected = RuntimeException.class)
+    public void noneInvokable() {
+        new IntrospectionData(DefaultInvokableTest.NoneInvokable.class, Optional.empty(), Optional.empty());
+    }
+
+
+    @Test(expected = RuntimeException.class)
+    public void noneInvokable2() {
+        new IntrospectionData(DefaultInvokableTest.NoneInvokable2.class, Optional.empty(), Optional.empty());
+    }
 }

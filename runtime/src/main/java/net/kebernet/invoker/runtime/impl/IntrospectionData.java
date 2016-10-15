@@ -64,6 +64,9 @@ public class IntrospectionData {
                 )
                 .map(m -> new InvokableMethod(m, findInvocationName, findParameterName))
                 .forEach(methods::add);
+        if(methods.isEmpty()){
+            throw new RuntimeException("Unable to find any invokable method on "+clazz.getCanonicalName());
+        }
     }
 
     /**
