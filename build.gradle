@@ -44,8 +44,8 @@ subprojects {
         repositories {
             maven {
                 credentials {
-                    username project.hasProperty("kebernet_bintray") == null ? "" : kebernet_bintray
-                    password project.hasProperty("kebernet_bintray_api") == null ? "" : kebernet_bintray_api
+                    username project.hasProperty("kebernet_bintray") == null ? "" : project.getProperties().get("kebernet_bintray")
+                    password project.hasProperty("kebernet_bintray_api") == null ? "" :  project.getProperties().get("kebernet_bintray_api")
                 }
                 url "https://api.bintray.com/maven/kebernet/maven/invoker/"
             }
