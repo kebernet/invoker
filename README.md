@@ -28,6 +28,9 @@ Invoker's more generic declaration for a JAX-RS type framework might look like t
 
 ```
 
+But you can also provide your on strategies and use your own or third party annotations to drive
+the invoker.
+
 It is broken into two libraries, "annotation" and "runtime". The annotation library just has the 
 annotations you need on your POJOs. This can be included around any project without too much weight. 
 The runtime library contains the classes need to actually invoke methods on your annotated objects.

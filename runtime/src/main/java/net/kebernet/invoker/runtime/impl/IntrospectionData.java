@@ -46,16 +46,22 @@ public class IntrospectionData {
      * @param findInvocationName
      * @param findParameterName
      */
-    public IntrospectionData(@Nonnull Class clazz, @Nonnull Optional<Function<Method, String>> findInvocationName, @Nonnull Optional<Function<Parameter, String>> findParameterName) {
+    public IntrospectionData(@Nonnull Class clazz,
+                             @Nonnull Optional<Function<Method, String>> findInvocationName,
+                             @Nonnull Optional<Function<Parameter, String>> findParameterName) {
         this.clazz = clazz;
         this.name = clazz.getCanonicalName();
         DefaultInvokable defaultInvokable = (DefaultInvokable) clazz.getAnnotation(DefaultInvokable.class);
-        final boolean isDefaultInvokable = defaultInvokable != null && defaultInvokable.value();
+        final boolean isDefaultInvokable = findInvocationName.isPresent() || defaultInvokable != null && defaultInvokable.value();
         Arrays.stream(clazz.getMethods())
                 .filter( m -> (m.getModifiers() & Modifier.PUBLIC) > 0 &&
                         !m.getDeclaringClass().getPackage().getName().startsWith("java.") &&
                         !m.getDeclaringClass().getPackage().getName().startsWith("javax.") &&
-                        isInvokable(isDefaultInvokable, m))
+                        (
+                            isInvokable(isDefaultInvokable, m) ||
+                            (findInvocationName.isPresent() && findInvocationName.get().apply(m) != null)
+                        )
+                )
                 .map(m -> new InvokableMethod(m, findInvocationName, findParameterName))
                 .forEach(methods::add);
     }
@@ -99,6 +105,6 @@ public class IntrospectionData {
         return this.methods.stream()
                 .sorted(new InvokableMethod.Comparator(name, parameters))
                 .findFirst()
-                .filter(im -> im.matchValue(name, parameters) == 0);
+                .filter(im -> im.matchValue(name, parameters) >= 0);
     }
 }

@@ -165,7 +165,7 @@ public class InvokableMethod {
             return memoize(values, -1);
         }
         Set<String> extra = new HashSet<>(valByName.keySet());
-        extra.removeAll( parameters.stream().map(NamedParameter::getName).collect(Collectors.toSet()));
+        extra.removeAll(parameters.stream().map(NamedParameter::getName).collect(Collectors.toSet()));
         if(!extra.isEmpty()){
             return memoize(values, -1);
         }

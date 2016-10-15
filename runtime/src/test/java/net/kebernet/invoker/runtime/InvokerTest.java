@@ -15,11 +15,20 @@
  */
 package net.kebernet.invoker.runtime;
 
+import net.kebernet.invoker.runtime.annotations.AnnTestClass;
+import net.kebernet.invoker.runtime.annotations.GET;
+import net.kebernet.invoker.runtime.annotations.Name;
+import net.kebernet.invoker.runtime.annotations.POST;
 import net.kebernet.invoker.runtime.impl.AbstractMatchTest;
 import net.kebernet.invoker.runtime.impl.MatchTestClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by rcooper on 10/14/16.
@@ -42,9 +51,34 @@ public class InvokerTest extends AbstractMatchTest {
         long secondTime = System.currentTimeMillis() - incept;
         // test memoization
         assertTrue(firstTime > secondTime);
+        System.out.println(firstTime+" vs "+secondTime);
         result = instance.invoke(testClass, "testMethod", values2);
         assertEquals("testMethod2", result);
 
+    }
+
+
+    @Test
+    public void testCustomAnnotations() throws InvokerException {
+        Invoker instance = new Invoker(InvokerTest::methodName, InvokerTest::paramName);
+        AnnTestClass target = new AnnTestClass();
+        String get = instance.invoke(target, "GET", Arrays.asList(new ParameterValue("path", "foo")));
+        String post = instance.invoke(target, "POST", Arrays.asList(new ParameterValue("path", "bar")));
+        assertEquals("GET foo", get);
+        assertEquals("POST bar", post);
+    }
+
+    private static String paramName(Parameter p){
+        Name n = p.getAnnotation(Name.class);
+        return n.value();
+    }
+
+    private static String methodName(Method m){
+        if(m.getAnnotation(GET.class) != null)
+            return "GET";
+        else if (m.getAnnotation(POST.class) != null)
+            return "POST";
+        else return null;
     }
 
 }
