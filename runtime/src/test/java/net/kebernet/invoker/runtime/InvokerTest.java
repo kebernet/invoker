@@ -51,7 +51,6 @@ public class InvokerTest extends AbstractMatchTest {
         long secondTime = System.currentTimeMillis() - incept;
         // test memoization
         assertTrue(firstTime > secondTime);
-        System.out.println(firstTime+" vs "+secondTime);
         result = instance.invoke(testClass, "testMethod", values2);
         assertEquals("testMethod2", result);
 
