@@ -44,8 +44,8 @@ subprojects {
         repositories {
             maven {
                 credentials {
-                    username kebernet_bintray
-                    password kebernet_bintray_api
+                    username kebernet_bintray == null ? "" : kebernet_bintray
+                    password kebernet_bintray_api == null ? "" : kebernet_bintray_api
                 }
                 url "https://api.bintray.com/maven/kebernet/maven/invoker/"
             }

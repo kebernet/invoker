@@ -131,7 +131,7 @@ function references to extract the invocation names and parameter names when you
 
     private static String paramName(Parameter p){
             PathParam pp = p.getAnnotation(PathParam.class);
-            return pp.value();
+            return pp == null ? null : pp.value();
         }
     
         private static String methodName(Method m){
