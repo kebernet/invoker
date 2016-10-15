@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
 public @interface DefaultInvokable {
     /** The default invokable method on a class
      *
-     * @return
+     * @return The default invokable state for the class.
      */
     boolean value();
 }

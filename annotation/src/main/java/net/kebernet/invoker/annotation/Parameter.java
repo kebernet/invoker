@@ -31,13 +31,13 @@ import java.lang.annotation.Target;
 public @interface Parameter {
     /** The name for the parameter
      *
-     * @return
+     * @return The name for the parameter
      */
     String value();
 
     /** Whether the parameter is required.
      *
-     * @return
+     * @return the required status for the parameter
      */
     boolean required() default true;
 }

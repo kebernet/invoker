@@ -18,7 +18,6 @@ package net.kebernet.invoker.runtime.impl;
 import net.kebernet.invoker.runtime.ParameterValue;
 import org.junit.Test;
 
-import javax.management.relation.RoleUnresolved;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by rcooper on 10/14/16.

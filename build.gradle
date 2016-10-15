@@ -1,9 +1,13 @@
-group 'net.kebernet'
-version '1.0-SNAPSHOT'
+
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.13'
   distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
+
+allprojects {
+    group 'net.kebernet.invoker'
+    version '0.0.1'
 }
 
 subprojects {
@@ -17,4 +21,48 @@ subprojects {
             classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.13.1"
         }
     }
+
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    publishing {
+        repositories {
+            maven {
+                credentials {
+                    username kebernet_bintray
+                    password kebernet_bintray_api
+                }
+                url "https://api.bintray.com/maven/kebernet/maven/invoker/"
+            }
+        }
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifact sourcesJar {
+                    classifier "sources"
+                }
+                artifact javadocJar {
+                    classifier "javadoc"
+                }
+            }
+        }
+    }
+
+
 }
+

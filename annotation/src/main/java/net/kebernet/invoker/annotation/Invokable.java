@@ -30,13 +30,13 @@ import java.lang.annotation.Target;
 public @interface Invokable {
     /** Whether the method is invokable
      *
-     * @return
+     * @return The invokable status for the method.
      */
     boolean value() default true;
 
     /** The invocation name of the method to use, or default for the Java method name
      *
-     * @return
+     * @return Return the invocation name
      */
     String invocationName() default "";
 }

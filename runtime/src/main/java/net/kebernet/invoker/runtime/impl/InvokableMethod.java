@@ -98,12 +98,12 @@ public class InvokableMethod {
 
     /**
      * This method returns a match distance for the given name and parameter values. The
-     * return result will be <0 for no match, 0 for exact match, and a positive integer
+     * return result will be  &lt; 0 for no match, 0 for exact match, and a positive integer
      * representing the distance from being an exact match.
      *
      * @param name The name of the method to match.
      * @param values The list of parameter names and values to match.
-     * @return An integer value of <0 for no match, or a distance from exact match.
+     * @return An integer value of &lt; 0 for no match, or a distance from exact match.
      */
     public int matchValue(@Nonnull String name, @Nonnull List<ParameterValue> values) {
         if (!name.equals(this.name)) {

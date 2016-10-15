@@ -43,8 +43,8 @@ public class IntrospectionData {
     /**
      * Constructor
      * @param clazz the class we are creating introspection data for.
-     * @param findInvocationName
-     * @param findParameterName
+     * @param findInvocationName A strategy for finding the invocation name of a method
+     * @param findParameterName a strategy for findingh the name of a parameter.
      */
     public IntrospectionData(@Nonnull Class clazz,
                              @Nonnull Optional<Function<Method, String>> findInvocationName,
