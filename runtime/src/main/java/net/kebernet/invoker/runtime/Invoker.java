@@ -62,6 +62,16 @@ public class Invoker {
     }
 
     /**
+     * Returns the IntrospectionData for a type.
+     * @param type Type to introspect.
+     * @return IntrospectionData for the type.
+     */
+    public IntrospectionData lookupType(@Nonnull Class type){
+        return Optional.ofNullable(this.introspectionData.get(type))
+                .orElseGet(()->registerAndReturn(type));
+    }
+
+    /**
      * Invokes the named method on the target object from list of ParameterValues.
      *
      * @param target The object to invoke on

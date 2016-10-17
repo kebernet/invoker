@@ -2,11 +2,45 @@ apply plugin: 'java'
 apply plugin: "com.github.hierynomus.license"
 apply plugin: 'findbugs'
 apply plugin: "jacoco"
+apply plugin: 'nebula.maven-publish'
 
-sourceCompatibility = 1.8
+description = 'A utility library for dynamically invoking annotated java methods.'
 
-repositories {
-    mavenCentral()
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username project.hasProperty("kebernet_bintray") == null ? "" : project.getProperties().get("kebernet_bintray")
+                password project.hasProperty("kebernet_bintray_api") == null ? "" :  project.getProperties().get("kebernet_bintray_api")
+            }
+            url "https://api.bintray.com/maven/kebernet/maven/invoker/"
+        }
+    }
+    publications {
+        nebula(MavenPublication) {
+            artifact sourcesJar {
+                classifier "sources"
+            }
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+
+            pom.withXml {
+                def p = asNode()
+                p.appendNode('url', 'https://github.com/kebernet/invoker')
+                p.appendNode('inceptionYear', '2016')
+                def lic = p.appendNode('licenses')
+                        .appendNode('license')
+                lic.appendNode('name', 'Apache Software License, Version 2.0')
+                lic.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                lic.appendNode('distribution', 'repo')
+                def scm = p.appendNode('scm')
+                scm.appendNode('connection', 'scm:git:git@github.com:kebernet/invoker.git')
+                scm.appendNode('url', 'https://github.com/kebernet/invoker')
+
+            }
+        }
+    }
 }
 
 license {
@@ -19,7 +53,6 @@ tasks.withType(FindBugs) {
     reports {
         xml.enabled false
         html.enabled true
-//        html.stylesheet resources.text.fromFile('config/xsl/findbugs-custom.xsl')
     }
 }
 

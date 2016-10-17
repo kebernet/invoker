@@ -1,4 +1,17 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter();
+    }
+    dependencies {
+        classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.13.1'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.9.1'
+    }
+}
 
+apply plugin: 'nebula.maven-publish'
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.13'
@@ -7,24 +20,16 @@ task wrapper(type: Wrapper) {
 
 allprojects {
     group 'net.kebernet.invoker'
-    version '0.0.1'
+    version '0.0.3'
 }
 
 subprojects {
-    buildscript {
-        repositories {
-            maven {
-                url "https://plugins.gradle.org/m2/"
-            }
-        }
-        dependencies {
-            classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.13.1"
-        }
+    repositories {
+        mavenCentral()
+        jcenter()
     }
-
     apply plugin: 'java'
-    apply plugin: 'maven-publish'
-
+    sourceCompatibility = 1.8
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
@@ -40,29 +45,12 @@ subprojects {
         archives javadocJar
     }
 
-    publishing {
-        repositories {
-            maven {
-                credentials {
-                    username project.hasProperty("kebernet_bintray") == null ? "" : project.getProperties().get("kebernet_bintray")
-                    password project.hasProperty("kebernet_bintray_api") == null ? "" :  project.getProperties().get("kebernet_bintray_api")
-                }
-                url "https://api.bintray.com/maven/kebernet/maven/invoker/"
-            }
-        }
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-                artifact sourcesJar {
-                    classifier "sources"
-                }
-                artifact javadocJar {
-                    classifier "javadoc"
-                }
-            }
-        }
+    task installGitHooks(type: Copy) {
+        from new File(rootProject.rootDir, '/etc/pre-commit')
+        into { new File(rootProject.rootDir, '.git/hooks/') }
     }
 
+    build.dependsOn installGitHooks
 
 }
 
