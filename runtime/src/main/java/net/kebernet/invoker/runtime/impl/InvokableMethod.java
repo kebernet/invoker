@@ -131,7 +131,7 @@ public class InvokableMethod {
         }
         try {
             Object result = this.method.invoke(target, arguments);
-            if(this.method.getReturnType().equals(Void.class)){
+            if(this.method.getReturnType().equals(Void.TYPE)){
                 return (T) Void.class;
             } else {
                 return (T) result;
@@ -141,17 +141,31 @@ public class InvokableMethod {
         }
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
     private int matchValues(@Nonnull List<ParameterValue> values){
         HashMap<String, ParameterValue> valByName = new HashMap<>(values.size());
         values.forEach(pv -> valByName.put(pv.getName(), pv));
         Set<NamedParameter> matches = parameters
                 .stream()
                 .filter(np -> {
+
+
                     ParameterValue pv = valByName.get(np.getName());
+
                     return pv != null &&
                             (pv.getValue() == null ||
                                     // TODO check here for coersions?
                                     np.getType().isAssignableFrom(pv.getValue().getClass()));
+//                    if(np.getType().isPrimitive() && (pv == null || pv.getValue() == null)){
+//                        return false;
+//                    } else if(pv == null || pv.getValue() == null){
+//                        return true;
+//                    } else if(np.getType().isPrimitive() && primitiveCanMap(np.getType(), pv.getValue().getClass())){
+//                        return true;
+//                    } else {
+//                        return np.getType().isAssignableFrom(pv.getValue().getClass());
+//                    }
+
                 })
                 .collect(Collectors.toSet());
 
@@ -182,6 +196,16 @@ public class InvokableMethod {
             return memoize(values, -1);
         }
         else return memoize(values, missing.size());
+    }
+
+    private static boolean primitiveCanMap(Class primitiveType, Class<?> argumentType) {
+        return (primitiveType == Integer.TYPE && argumentType == Integer.class) ||
+                (primitiveType == Long.TYPE && argumentType == Long.class) ||
+                (primitiveType == Byte.TYPE && argumentType == Byte.class) ||
+                (primitiveType == Boolean.TYPE && argumentType == Boolean.class) ||
+                (primitiveType == Character.TYPE && argumentType == Character.class) ||
+                (primitiveType == Float.TYPE && argumentType == Float.class) ||
+                (primitiveType == Double.TYPE && argumentType == Double.class);
     }
 
     /**

@@ -85,11 +85,26 @@ public class Invoker {
         IntrospectionData data = Optional.ofNullable(introspectionData.get(target.getClass()))
                 .orElseGet(()-> registerAndReturn(target.getClass()));
         Optional<InvokableMethod> method = data.bestMatch(methodName, values);
+        return invoke(target,
+                method.orElseThrow(
+                ()-> new InvokerException("Could not resolve method name:" +methodName, null, target, methodName, values)
+            ), values);
+    }
+
+    /**
+     * Invokes the named method on the target object from list of ParameterValues.
+     *
+     * @param target The object to invoke on
+     * @param method The method to invoke
+     * @param values values for the named parameters
+     * @param <T> The return type of the method
+     * @return The results of the method, or Void.class if the method has not return value.
+     * @throws InvokerException is thrown generally if there is a reflection problem or the target method could not be resolved.
+     */
+    public <T> T invoke(Object target, InvokableMethod method, List<ParameterValue> values) throws InvokerException {
         HashMap<String, ParameterValue> valuesMap = new HashMap<>();
         values.forEach(v -> valuesMap.put(v.getName(), v));
-        return method.orElseThrow(
-                ()-> new InvokerException("Could not resolve method name:" +methodName, null, target, methodName, values)
-            ).invoke(target, valuesMap);
+        return method.invoke(target, valuesMap);
     }
 
     /**

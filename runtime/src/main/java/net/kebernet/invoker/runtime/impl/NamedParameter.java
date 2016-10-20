@@ -32,7 +32,7 @@ public class NamedParameter {
 
     public NamedParameter(@Nonnull java.lang.reflect.Parameter parameter, Optional<Function<java.lang.reflect.Parameter, String>> findParameterName) {
         this.parameter = parameter;
-        this.type = parameter.getType();
+        this.type = noPrimitives(parameter.getType());
         Parameter nameAnnotation = parameter.getAnnotation(Parameter.class);
         this.name = findParameterName.orElse((p)->{
             if(nameAnnotation == null){
@@ -95,5 +95,33 @@ public class NamedParameter {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (required ? 1 : 0);
         return result;
+    }
+
+    private static Class<?> noPrimitives(Class<?> destination) {
+        if(!destination.isPrimitive()){
+            return destination;
+        }
+        if(destination == Long.TYPE){
+            return Long.class;
+        }
+        if(destination == Integer.TYPE){
+            return Integer.class;
+        }
+        if(destination == Boolean.TYPE){
+            return Boolean.class;
+        }
+        if(destination == Character.TYPE){
+            return Character.class;
+        }
+        if(destination == Byte.TYPE){
+            return Byte.class;
+        }
+        if(destination == Float.TYPE){
+            return Float.class;
+        }
+        if(destination == Double.TYPE){
+            return Double.class;
+        }
+        throw new RuntimeException("Unhandled primitive type "+destination.getCanonicalName());
     }
 }
